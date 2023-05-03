@@ -41,9 +41,6 @@ device.setIrAndDepthFrameListener(listener)
 
 device.startStreams(rgb=True, depth=False)
 
-undistorted = Frame(512, 424, 4)
-registered = Frame(512, 424, 4)
-
 def stream():
     frames = listener.waitForNewFrame()
     color = frames["color"]
