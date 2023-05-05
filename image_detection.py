@@ -18,16 +18,14 @@ import BaiduAI.EasyEdge as edge
 import logging
 
 from kinect_stream import stream, stream_close
+import time
 
 # edge.Log.set_level(logging.DEBUG)
 
 try:
-    # _model_dir = sys.argv[1]
-    # _test_file = sys.argv[2]
     _model_dir = "./RES/"
-    #_test_file = sys.argv[1]
 except Exception as e:
-    print("Usage: python3 image_detection.py")
+    print("\n{model_dir} Error! Please check it!\n")
     exit(-1)
 
 
@@ -47,7 +45,12 @@ pred.init(model_dir=_model_dir,
 		  thread_num=4,
 		  **edgekit_specific_config)
 
+last_timestamp = 0
+this_timestamp = 1
+
+
 def detect(img):
+	global this_timestamp, last_timestamp
 	height, width, _ = img.shape
 	result = pred.infer_image(img, threshold=None)
 	for det in result:
@@ -66,7 +69,15 @@ def detect(img):
 					fontScale=2,
 					color=(0, 255, 0),
 					thickness=2)
-
+	this_timestamp = time.time()
+	cv2.putText(img=img,
+			text="FPS" + " " + str(round(1 / (this_timestamp-last_timestamp), 1)),
+			org=(0, height),
+			fontFace=cv2.FONT_HERSHEY_PLAIN,
+			fontScale=2,
+			color=(255, 255, 255),
+			thickness=2)
+	last_timestamp = this_timestamp
 	if pred.model_type in [edge.c.ModelType.ObjectDetection, edge.c.ModelType.FaceDetection, edge.c.ModelType.ImageSegmentation]:
 		return img
 
